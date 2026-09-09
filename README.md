@@ -125,7 +125,11 @@ docker run -d --name caso2-onpe -p 5000:5000 caso2-onpe:v1.2-multistage
 ### Caso 2
 
 - [Interfaz principal](evidencias/caso2/01-interfaz-principal.png)
+- [Consulta en el portal ONPE](evidencias/caso2/02-consulta-onpe-no-miembro.png)
 - [Validación de resultado no miembro](evidencias/caso2/03-resultado-no-miembro.png)
+- [Registro de miembro de mesa](evidencias/caso2/04-registro-miembro-mesa.png)
+- [Archivo Excel generado](evidencias/caso2/05-excel-miembros-mesa.png)
 
-Los videos descargados, archivos Excel, entornos virtuales y evidencias con datos privados están excluidos de Git.
+Los videos descargados, archivos Excel y entornos virtuales están excluidos de Git.
+
 
