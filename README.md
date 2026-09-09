@@ -126,10 +126,6 @@ Invoke-WebRequest -Uri http://localhost:5000 -UseBasicParsing
 git status
 git log --oneline
 ```
-
-
-No se incluyen capturas ficticias. Los archivos deben agregarse después de tomarlas en la computadora donde se ejecutó la práctica.
-
 ### Problemas encontrados y solución
 
 1. La versión solicitada inicialmente de yt-dlp no existía en PyPI. Se consultaron las versiones disponibles y se fijó `2026.8.19`.
