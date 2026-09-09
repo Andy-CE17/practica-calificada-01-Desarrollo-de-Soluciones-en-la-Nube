@@ -63,6 +63,9 @@
                     <h2>Resultados registrados</h2>
                     <p>{{ registros|length }} registro(s)</p>
                 </div>
+                {% if registros %}
+                    <a class="boton" href="{{ url_for('exportar_excel') }}">Exportar Excel</a>
+                {% endif %}
             </div>
 
             {% if registros %}
