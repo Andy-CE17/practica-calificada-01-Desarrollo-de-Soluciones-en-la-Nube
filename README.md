@@ -146,23 +146,23 @@ No se incluyen capturas ficticias. Los archivos deben agregarse después de toma
 
 El Caso 1 permite validar y procesar enlaces públicos compatibles sin detener el servidor cuando una URL falla. Para Facebook se prioriza el formato SD, se aplica un límite de 200 MB y se evita iniciar más de una descarga simultánea. La aplicación funciona localmente y en las tres imágenes Docker. El orden de capas, `.dockerignore` y la construcción multistage redujeron el tamaño final de 1.47 GB a 578 MB.
 
-## Caso 2: registro electoral y generación de Excel
+## Caso 2: miembros de mesa y generación de Excel
 
-Aplicación web para registrar manualmente los resultados de una consulta electoral permitida y exportarlos a Excel. El formulario administra DNI, ubicación, región, provincia, distrito y dirección del local de votación.
+Aplicación web para registrar a las personas que, después de consultar su DNI en el portal oficial de ONPE, aparecen como miembros de mesa. Solo los resultados marcados como **Sí** se incorporan a la tabla y al archivo Excel.
 
-La aplicación no automatiza consultas en el portal de ONPE ni intenta superar CAPTCHA, autenticación o controles anti-bot. Los datos de prueba deben ser ficticios. La URL de referencia indicada por la guía es <https://consultaelectoral.onpe.gob.pe/inicio>.
+La aplicación no automatiza el portal ni intenta superar CAPTCHA, autenticación o controles anti-bot. El usuario consulta un DNI propio o proporcionado con autorización en <https://consultaelectoral.onpe.gob.pe/inicio> y registra el resultado mostrado por ONPE.
 
 ### Tecnologías utilizadas
 
 - Python 3.11
 - Flask 3.1.2
 - openpyxl 3.1.5
-- HTML y CSS
+- HTML, CSS y JavaScript básico
 - Docker Desktop
 
 ### Estructura
 
-```text
+~~~text
 caso2-onpe/
 ├── app.py
 ├── requirements.txt
@@ -175,108 +175,118 @@ caso2-onpe/
 ├── Dockerfile
 ├── Dockerfile.optimizado
 └── Dockerfile.multistage
-```
+~~~
 
 ### Funcionamiento y validaciones
 
-1. El usuario realiza la consulta permitida y copia manualmente el resultado.
-2. Completa todos los campos del formulario.
-3. El backend comprueba que ningún campo esté vacío y que el DNI tenga exactamente ocho dígitos.
-4. Los resultados válidos se muestran en una tabla.
-5. El botón **Exportar Excel** genera `exports/resultados_electorales.xlsx`.
+1. Se abre el portal oficial mediante el botón **Abrir portal ONPE**.
+2. El usuario consulta el DNI y verifica si aparece como miembro de mesa.
+3. En la aplicación se ingresa el DNI y se selecciona **Sí** o **No**.
+4. Si se selecciona **Sí**, son obligatorios ubicación o local, región, provincia, distrito y dirección.
+5. Si se selecciona **No**, el DNI no se agrega a la lista ni al Excel.
+6. La aplicación valida que el DNI tenga ocho dígitos y evita registros duplicados.
+7. **Exportar Excel** genera el archivo exports/miembros_de_mesa.xlsx.
 
-Los registros se mantienen en memoria mientras la aplicación está activa. Al reiniciar el proceso o el contenedor, la tabla comienza vacía.
+Los registros permanecen en memoria durante la ejecución. Al reiniciar la aplicación o el contenedor, la tabla comienza vacía.
 
 ### Instalación y ejecución local
 
 Desde la raíz del repositorio:
 
-```powershell
+~~~powershell
 Set-Location .\caso2-onpe
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe app.py
-```
+~~~
 
-Abrir <http://localhost:5000>. Para comprobar la validación se puede enviar el formulario vacío o utilizar un DNI que no tenga ocho dígitos.
+Abrir <http://localhost:5000>. Para las pruebas de desarrollo se deben usar datos ficticios. Para la evidencia final se utiliza únicamente un DNI propio o proporcionado con autorización.
 
 ### Generación de Excel
 
-Después de agregar al menos un registro, seleccionar **Exportar Excel**. El archivo contiene los encabezados DNI, Ubicación, Región, Provincia, Distrito y Dirección del local de votación.
+El archivo contiene solamente personas confirmadas como miembros de mesa y utiliza los siguientes encabezados:
 
-```powershell
+- DNI
+- Miembro de mesa
+- Ubicación
+- Región
+- Provincia
+- Distrito
+- Dirección del local de votación
+
+~~~powershell
 Get-ChildItem .\exports
-```
+~~~
 
-La carpeta `exports` está ignorada para evitar versionar información electoral o archivos generados.
+La carpeta exports está ignorada para evitar publicar DNIs o archivos generados en GitHub.
 
 ### Dockerfile base
 
-```powershell
+~~~powershell
 docker build -t caso2-onpe:v1.0 .
 docker run -d --name caso2-onpe-v1 -p 5000:5000 caso2-onpe:v1.0
 docker ps
 docker logs caso2-onpe-v1
-```
+~~~
 
 ### Dockerfile optimizado
 
-`Dockerfile.optimizado` copia primero `requirements.txt` para reutilizar la capa de dependencias. `.dockerignore` evita enviar Git, entornos virtuales, exportaciones, cachés y archivos temporales al contexto de construcción.
+Dockerfile.optimizado copia primero requirements.txt para reutilizar la capa de dependencias. .dockerignore excluye Git, entornos virtuales, exportaciones, cachés y archivos temporales.
 
-```powershell
+~~~powershell
 docker build -f Dockerfile.optimizado -t caso2-onpe:v1.1-optimizado .
 docker run -d --name caso2-onpe-optimizado -p 5000:5000 caso2-onpe:v1.1-optimizado
-```
+~~~
 
 ### Dockerfile Multi-Stage
 
-La primera etapa instala las dependencias en `/opt/python`. La etapa final usa Debian, instala únicamente Python y certificados, y copia las dependencias preparadas junto con el código.
+La primera etapa instala las dependencias en /opt/python. La etapa final usa Debian, instala Python y certificados, y copia las dependencias preparadas junto con el código.
 
-```powershell
+~~~powershell
 docker build -f Dockerfile.multistage -t caso2-onpe:v1.2-multistage .
 docker run -d --name caso2-onpe-multistage -p 5000:5000 caso2-onpe:v1.2-multistage
-```
+~~~
 
 ### Comparación obtenida
 
-```powershell
+~~~powershell
 docker images caso2-onpe
-```
+~~~
 
 | Imagen | Tamaño obtenido |
 | --- | ---: |
-| `caso2-onpe:v1.0` | 273 MB |
-| `caso2-onpe:v1.1-optimizado` | 210 MB |
-| `caso2-onpe:v1.2-multistage` | 193 MB |
+| caso2-onpe:v1.0 | 226 MB |
+| caso2-onpe:v1.1-optimizado | 210 MB |
+| caso2-onpe:v1.2-multistage | 193 MB |
 
 Los tamaños pueden variar ligeramente según Docker Desktop y las imágenes base.
 
 ### Comandos de comprobación
 
-```powershell
+~~~powershell
 docker ps
 docker logs <nombre-contenedor>
 docker images caso2-onpe
 Invoke-WebRequest -Uri http://localhost:5000 -UseBasicParsing
 git status
 git log --oneline
-```
+~~~
 
-Durante las pruebas de esta computadora se utilizó temporalmente `-p 5002:5000` porque el puerto 5000 estaba ocupado por otro contenedor.
+Durante las pruebas de esta computadora se utilizó temporalmente -p 5002:5000 porque el puerto 5000 estaba ocupado.
 
 ### Evidencias
 
-Las capturas reales deben guardarse en `evidencias/caso2/`. Se recomienda incluir la ejecución local, el formulario con datos ficticios, el Excel abierto, cada contenedor funcionando y la comparación de las tres imágenes.
+Las capturas reales deben guardarse en evidencias/caso2/. Deben mostrar la consulta permitida en ONPE, la confirmación de miembro de mesa, la lista de la aplicación, el Excel abierto, cada contenedor funcionando y la comparación de imágenes.
 
-No se incluyen capturas ficticias. Los archivos deben agregarse después de tomarlas en la computadora donde se ejecutó la práctica.
+No se incluyen capturas ficticias. Tampoco se versiona el Excel que contiene DNIs.
 
-### Observaciones y solución de problemas
+### Observaciones
 
-- Si el portal presenta CAPTCHA o controles anti-bot, la consulta se realiza manualmente y el resultado se ingresa en esta aplicación.
-- Si el puerto 5000 está ocupado, se puede utilizar `-p 5002:5000` y abrir <http://localhost:5002>.
-- Si se intenta exportar sin registros, la aplicación muestra un mensaje y no genera un archivo vacío.
-- Los archivos `.xlsx` generados y los entornos virtuales están excluidos de Git.
+- ONPE requiere una consulta interactiva con JavaScript y puede aplicar controles anti-bot; por ello la verificación se realiza en su portal.
+- La aplicación registra únicamente los resultados positivos.
+- Si se intenta exportar sin miembros registrados, se muestra un mensaje de validación.
+- Los archivos .xlsx y los entornos virtuales están excluidos de Git.
 
 ### Conclusión
 
-El Caso 2 permite organizar resultados ingresados manualmente, validarlos y exportarlos a un Excel con encabezados claros. Las tres variantes Docker funcionan y la construcción multistage redujo la imagen de 273 MB a 193 MB.
+El Caso 2 cumple el flujo solicitado: verificar en ONPE si una persona es miembro de mesa, almacenar solamente los resultados positivos con su ubicación y generar el Excel. Las versiones Docker base, optimizada y multistage permiten ejecutar la misma aplicación.

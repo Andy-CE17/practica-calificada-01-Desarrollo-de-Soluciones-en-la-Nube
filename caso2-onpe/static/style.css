@@ -28,14 +28,28 @@ body { margin: 0; min-height: 100vh; }
 h2 { margin: 0; }
 .ayuda, .titulo-tabla p { margin: 7px 0 22px; color: #64748b; }
 
-.formulario { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.paso-consulta {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 26px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.formulario { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 18px; }
+.grupo-datos { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.grupo-datos[hidden] { display: none; }
 .campo { display: grid; gap: 7px; }
 .ancho { grid-column: 1 / -1; }
 label { font-size: 14px; font-weight: 650; }
-input { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font: inherit; }
-input:focus { outline: 3px solid #ccfbf1; border-color: #0f766e; }
+input, select { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; background: white; font: inherit; }
+input:focus, select:focus { outline: 3px solid #ccfbf1; border-color: #0f766e; }
 button, .boton { justify-self: start; padding: 12px 18px; border: 0; border-radius: 10px; color: white; background: #0f766e; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; }
 button:hover, .boton:hover { background: #115e59; }
+.boton.secundario { flex: 0 0 auto; background: #0f4c81; }
+.boton.secundario:hover { background: #123b61; }
 
 .mensaje { margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; }
 .error { color: #991b1b; background: #fee2e2; }
@@ -48,7 +62,7 @@ th { color: #475569; background: #f8fafc; }
 .vacio { margin: 18px 0 0; padding: 28px; border: 1px dashed #cbd5e1; border-radius: 12px; color: #64748b; text-align: center; }
 
 @media (max-width: 700px) {
-    .encabezado { align-items: flex-start; flex-direction: column; }
-    .formulario { grid-template-columns: 1fr; }
+    .encabezado, .paso-consulta { align-items: flex-start; flex-direction: column; }
+    .formulario, .grupo-datos { grid-template-columns: 1fr; }
     .ancho { grid-column: auto; }
 }

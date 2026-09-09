@@ -11,15 +11,25 @@ registros = []
 CARPETA_EXPORTACIONES = Path(__file__).parent / "exports"
 CARPETA_EXPORTACIONES.mkdir(exist_ok=True)
 
-CAMPOS = ["dni", "ubicacion", "region", "provincia", "distrito", "direccion"]
+CAMPOS_UBICACION = ["ubicacion", "region", "provincia", "distrito", "direccion"]
+TODOS_LOS_CAMPOS = ["dni", "es_miembro", *CAMPOS_UBICACION]
+
+
+def datos_vacios():
+    return {campo: "" for campo in TODOS_LOS_CAMPOS}
 
 
 def validar_registro(datos):
-    if any(not datos[campo] for campo in CAMPOS):
-        return "Completa todos los campos."
-
     if not datos["dni"].isdigit() or len(datos["dni"]) != 8:
         return "El DNI debe contener exactamente 8 dígitos."
+
+    if datos["es_miembro"] not in ("si", "no"):
+        return "Indica si el DNI corresponde a un miembro de mesa."
+
+    if datos["es_miembro"] == "si" and any(
+        not datos[campo] for campo in CAMPOS_UBICACION
+    ):
+        return "Completa la ubicación y la dirección del local de votación."
 
     return None
 
@@ -28,19 +38,30 @@ def validar_registro(datos):
 def inicio():
     mensaje_error = None
     mensaje_exito = None
-    datos = {campo: "" for campo in CAMPOS}
+    datos = datos_vacios()
 
     if request.method == "POST":
         datos = {
             campo: request.form.get(campo, "").strip()
-            for campo in CAMPOS
+            for campo in TODOS_LOS_CAMPOS
         }
         mensaje_error = validar_registro(datos)
 
-        if not mensaje_error:
-            registros.append(datos.copy())
-            mensaje_exito = "Resultado electoral registrado correctamente."
-            datos = {campo: "" for campo in CAMPOS}
+        if not mensaje_error and datos["es_miembro"] == "si":
+            dni_repetido = any(
+                registro["dni"] == datos["dni"] for registro in registros
+            )
+            if dni_repetido:
+                mensaje_error = "Este DNI ya está registrado en la lista."
+            else:
+                registros.append(datos.copy())
+                mensaje_exito = "Miembro de mesa agregado correctamente."
+                datos = datos_vacios()
+        elif not mensaje_error:
+            mensaje_exito = (
+                "El DNI consultado no es miembro de mesa y no se agregó al Excel."
+            )
+            datos = datos_vacios()
 
     return render_template(
         "index.html",
@@ -56,18 +77,19 @@ def exportar_excel():
     if not registros:
         return render_template(
             "index.html",
-            datos={campo: "" for campo in CAMPOS},
+            datos=datos_vacios(),
             registros=registros,
-            mensaje_error="Agrega al menos un resultado antes de exportar.",
+            mensaje_error="Agrega al menos un miembro de mesa antes de exportar.",
             mensaje_exito=None,
         ), 400
 
     libro = Workbook()
     hoja = libro.active
-    hoja.title = "Resultados electorales"
+    hoja.title = "Miembros de mesa"
 
     encabezados = [
         "DNI",
+        "Miembro de mesa",
         "Ubicación",
         "Región",
         "Provincia",
@@ -77,7 +99,13 @@ def exportar_excel():
     hoja.append(encabezados)
 
     for registro in registros:
-        hoja.append([registro[campo] for campo in CAMPOS])
+        hoja.append(
+            [
+                registro["dni"],
+                "Sí",
+                *[registro[campo] for campo in CAMPOS_UBICACION],
+            ]
+        )
 
     relleno = PatternFill("solid", fgColor="0F766E")
     for celda in hoja[1]:
@@ -85,17 +113,17 @@ def exportar_excel():
         celda.fill = relleno
         celda.alignment = Alignment(horizontal="center")
 
-    anchos = [14, 24, 20, 20, 20, 42]
-    for columna, ancho in zip("ABCDEF", anchos):
+    anchos = [14, 18, 24, 20, 20, 20, 42]
+    for columna, ancho in zip("ABCDEFG", anchos):
         hoja.column_dimensions[columna].width = ancho
 
-    ruta_archivo = CARPETA_EXPORTACIONES / "resultados_electorales.xlsx"
+    ruta_archivo = CARPETA_EXPORTACIONES / "miembros_de_mesa.xlsx"
     libro.save(ruta_archivo)
 
     return send_file(
         ruta_archivo,
         as_attachment=True,
-        download_name="resultados_electorales.xlsx",
+        download_name="miembros_de_mesa.xlsx",
     )
 
 
