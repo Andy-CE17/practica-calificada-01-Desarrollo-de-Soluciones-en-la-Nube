@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descargador de videos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="contenedor">
+        <section class="tarjeta">
+            <div class="icono" aria-hidden="true">↓</div>
+            <p class="etiqueta">CASO 1 · SOLUCIONES EN LA NUBE</p>
+            <h1>Descargador de videos</h1>
+            <p class="descripcion">
+                Procesa enlaces públicos y compatibles de tus plataformas favoritas.
+            </p>
+
+            <form method="post">
+                <label for="url">URL del video</label>
+                <div class="grupo-formulario">
+                    <input
+                        type="url"
+                        id="url"
+                        name="url"
+                        value="{{ url }}"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        autocomplete="url"
+                        required
+                    >
+                    <button type="submit">Procesar video</button>
+                </div>
+            </form>
+
+            {% if mensaje_error %}
+                <div class="mensaje error" role="alert">{{ mensaje_error }}</div>
+            {% endif %}
+
+            {% if mensaje_exito %}
+                <div class="mensaje exito" role="status">
+                    <span>{{ mensaje_exito }}</span>
+                    <a href="{{ url_for('obtener_archivo', nombre_archivo=archivo) }}">
+                        Guardar archivo
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="compatibles">
+                <p>Plataformas compatibles</p>
+                <div class="plataformas">
+                    <span>YouTube</span>
+                    <span>Instagram</span>
+                    <span>TikTok</span>
+                    <span>Facebook</span>
+                    <span>LinkedIn</span>
+                </div>
+            </div>
+
+            <p class="nota">
+                Utiliza solamente contenido público que tengas autorización para descargar.
+            </p>
+        </section>
+    </main>
+</body>
+</html>
