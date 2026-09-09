@@ -16,7 +16,10 @@
                 Procesa enlaces públicos y compatibles de tus plataformas favoritas.
             </p>
 
-            <form method="post">
+            <form
+                method="post"
+                onsubmit="const boton = this.querySelector('button'); boton.disabled = true; boton.textContent = 'Procesando...';"
+            >
                 <label for="url">URL del video</label>
                 <div class="grupo-formulario">
                     <input
@@ -57,7 +60,7 @@
             </div>
 
             <p class="nota">
-                Utiliza solamente contenido público que tengas autorización para descargar.
+                Utiliza contenido público autorizado. Facebook se descarga en calidad SD y admite hasta 200 MB.
             </p>
         </section>
     </main>

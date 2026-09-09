@@ -1,4 +1,5 @@
 from pathlib import Path
+from threading import Lock
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -23,6 +24,9 @@ PLATAFORMAS = {
     "linkedin.com": "LinkedIn",
 }
 
+BLOQUEO_DESCARGA = Lock()
+LIMITE_FACEBOOK = 200 * 1024 * 1024
+
 
 def obtener_plataforma(url):
     """Valida la URL y devuelve el nombre de la plataforma."""
@@ -42,10 +46,14 @@ def obtener_plataforma(url):
     return None
 
 
-def descargar_video(url):
-    identificador = uuid4().hex[:8]
+def crear_opciones(identificador, plataforma):
+    formato = "bv*[height<=720]+ba/b[height<=720]/b"
+
+    if plataforma == "Facebook":
+        formato = "sd/b[height<=?480]/b[height<=?720]/b"
+
     opciones = {
-        "format": "bv*[height<=720]+ba/b[height<=720]/b",
+        "format": formato,
         "outtmpl": str(
             CARPETA_DESCARGAS / f"{identificador}-%(title).80s-%(id)s.%(ext)s"
         ),
@@ -55,10 +63,21 @@ def descargar_video(url):
         "restrictfilenames": True,
         "quiet": True,
         "no_warnings": True,
+        "noprogress": True,
         "js_runtimes": {"node": {}},
         "socket_timeout": 30,
         "retries": 2,
     }
+
+    if plataforma == "Facebook":
+        opciones["max_filesize"] = LIMITE_FACEBOOK
+
+    return opciones
+
+
+def descargar_video(url, plataforma):
+    identificador = uuid4().hex[:8]
+    opciones = crear_opciones(identificador, plataforma)
 
     with YoutubeDL(opciones) as descargador:
         informacion = descargador.extract_info(url, download=True)
@@ -74,6 +93,24 @@ def descargar_video(url):
 
     ruta_archivo = max(archivos_creados, key=lambda ruta: ruta.stat().st_mtime)
     return ruta_archivo.name, informacion.get("title", ruta_archivo.stem)
+
+
+def mensaje_para_error(error, plataforma):
+    detalle = str(error).lower()
+
+    if "max-filesize" in detalle or "larger than" in detalle:
+        return "El video supera el límite de 200 MB permitido por la aplicación."
+
+    if plataforma == "Facebook" and any(
+        texto in detalle
+        for texto in ("login", "private", "no video formats", "cannot parse data")
+    ):
+        return (
+            "Facebook no entregó un video público compatible. "
+            "Prueba otro enlace visible sin iniciar sesión."
+        )
+
+    return "No se pudo procesar el video. Verifica que el enlace sea público y compatible."
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -92,19 +129,22 @@ def inicio():
             plataforma = obtener_plataforma(url)
             if not plataforma:
                 mensaje_error = "Ingresa una URL válida de una plataforma compatible."
+            elif not BLOQUEO_DESCARGA.acquire(blocking=False):
+                mensaje_error = "Ya hay una descarga en curso. Espera a que termine."
             else:
                 try:
-                    archivo, titulo = descargar_video(url)
-                    mensaje_exito = f"Video procesado correctamente desde {plataforma}: {titulo}"
+                    archivo, titulo = descargar_video(url, plataforma)
+                    mensaje_exito = (
+                        f"Video procesado correctamente desde {plataforma}: {titulo}"
+                    )
                 except DownloadError as error:
                     app.logger.warning("Error al procesar la URL: %s", error)
-                    mensaje_error = (
-                        "No se pudo procesar el video. Verifica que el enlace sea público "
-                        "y compatible."
-                    )
+                    mensaje_error = mensaje_para_error(error, plataforma)
                 except Exception:
                     app.logger.exception("Error inesperado durante la descarga")
                     mensaje_error = "Ocurrió un error inesperado. Intenta nuevamente."
+                finally:
+                    BLOQUEO_DESCARGA.release()
 
     return render_template(
         "index.html",

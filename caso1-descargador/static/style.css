@@ -181,3 +181,8 @@ button:hover,
         flex-direction: column;
     }
 }
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}

@@ -138,11 +138,13 @@ No se incluyen capturas ficticias. Los archivos deben agregarse después de toma
 2. YouTube requiere actualmente un runtime JavaScript y los scripts EJS de yt-dlp. Se utilizó Node.js 22 y `yt-dlp[default]`.
 3. Algunos videos publican audio y video por separado. Se agregó `imageio-ffmpeg` para unir ambas pistas en un archivo reproducible.
 4. La primera etapa final multistage utilizó `python3-minimal`, que no incluía el módulo estándar `uuid`. Se cambió a `python3` con `--no-install-recommends`.
-5. Durante las pruebas, otro contenedor llamado `mi-app-container` ya utilizaba el puerto 5000. Para no interrumpirlo, los contenedores del Caso 1 se comprobaron temporalmente con `-p 5001:5000`. En un equipo con el puerto libre se debe usar `-p 5000:5000`.
+5. Facebook ofrecía un formato de 720p de 918 MB para un video de una hora. Se cambió la selección a SD, se agregó un límite de 200 MB y se bloquearon los envíos repetidos.
+6. Algunos reels públicos pueden dejar de ser compatibles cuando Facebook cambia su página; la aplicación informa la limitación sin solicitar credenciales.
+7. Durante las pruebas, otro contenedor llamado `mi-app-container` ya utilizaba el puerto 5000. Para no interrumpirlo, los contenedores del Caso 1 se comprobaron temporalmente con `-p 5001:5000`. En un equipo con el puerto libre se debe usar `-p 5000:5000`.
 
 ### Conclusión
 
-El Caso 1 permite validar y procesar enlaces públicos compatibles sin detener el servidor cuando una URL falla. La aplicación funciona localmente y en las tres imágenes Docker. El orden de capas, `.dockerignore` y la construcción multistage redujeron el tamaño final de 1.47 GB a 578 MB.
+El Caso 1 permite validar y procesar enlaces públicos compatibles sin detener el servidor cuando una URL falla. Para Facebook se prioriza el formato SD, se aplica un límite de 200 MB y se evita iniciar más de una descarga simultánea. La aplicación funciona localmente y en las tres imágenes Docker. El orden de capas, `.dockerignore` y la construcción multistage redujeron el tamaño final de 1.47 GB a 578 MB.
 
 ## Caso 2: registro electoral y generación de Excel
 
