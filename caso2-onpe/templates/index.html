@@ -112,6 +112,7 @@
                                 <th>Provincia</th>
                                 <th>Distrito</th>
                                 <th>Dirección</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -124,6 +125,16 @@
                                     <td>{{ registro.provincia }}</td>
                                     <td>{{ registro.distrito }}</td>
                                     <td>{{ registro.direccion }}</td>
+                                    <td>
+                                        <form
+                                            method="post"
+                                            action="{{ url_for('eliminar_registro', dni=registro.dni) }}"
+                                            class="formulario-eliminar"
+                                            onsubmit="return confirm('¿Eliminar este registro?');"
+                                        >
+                                            <button type="submit" class="boton-eliminar">Eliminar</button>
+                                        </form>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>

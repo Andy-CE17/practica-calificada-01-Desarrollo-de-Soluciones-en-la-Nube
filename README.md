@@ -185,7 +185,8 @@ caso2-onpe/
 4. Si se selecciona **Sí**, son obligatorios ubicación o local, región, provincia, distrito y dirección.
 5. Si se selecciona **No**, el DNI no se agrega a la lista ni al Excel.
 6. La aplicación valida que el DNI tenga ocho dígitos y evita registros duplicados.
-7. **Exportar Excel** genera el archivo exports/miembros_de_mesa.xlsx.
+7. Cada fila puede eliminarse con el botón **Eliminar** antes de generar el archivo.
+8. **Exportar Excel** genera el archivo exports/miembros_de_mesa.xlsx.
 
 Los registros permanecen en memoria durante la ejecución. Al reiniciar la aplicación o el contenedor, la tabla comienza vacía.
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, redirect, render_template, request, send_file, url_for
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
@@ -70,6 +70,16 @@ def inicio():
         mensaje_error=mensaje_error,
         mensaje_exito=mensaje_exito,
     )
+
+
+@app.post("/eliminar/<dni>")
+def eliminar_registro(dni):
+    for registro in registros:
+        if registro["dni"] == dni:
+            registros.remove(registro)
+            break
+
+    return redirect(url_for("inicio"))
 
 
 @app.route("/exportar")

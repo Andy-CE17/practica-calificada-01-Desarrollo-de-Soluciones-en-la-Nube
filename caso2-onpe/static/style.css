@@ -60,6 +60,9 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
 th { color: #475569; background: #f8fafc; }
 .vacio { margin: 18px 0 0; padding: 28px; border: 1px dashed #cbd5e1; border-radius: 12px; color: #64748b; text-align: center; }
+.formulario-eliminar { margin: 0; }
+.boton-eliminar { padding: 8px 12px; background: #dc2626; font-size: 13px; }
+.boton-eliminar:hover { background: #991b1b; }
 
 @media (max-width: 700px) {
     .encabezado, .paso-consulta { align-items: flex-start; flex-direction: column; }
