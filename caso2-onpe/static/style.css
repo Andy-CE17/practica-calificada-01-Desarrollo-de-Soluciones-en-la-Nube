@@ -1,0 +1,54 @@
+:root {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #18212f;
+    background: #f1f5f9;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; min-height: 100vh; }
+
+.encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 38px max(24px, calc((100% - 1120px) / 2));
+    color: white;
+    background: linear-gradient(130deg, #0f766e, #0f4c81);
+}
+
+.encabezado h1 { margin: 5px 0 8px; font-size: clamp(28px, 5vw, 42px); }
+.encabezado p { margin: 0; color: #dbeafe; }
+.etiqueta { font-size: 12px; font-weight: 700; letter-spacing: .14em; }
+.insignia { padding: 10px 16px; border: 1px solid #99f6e4; border-radius: 999px; font-weight: 700; }
+
+.contenido { width: min(1120px, calc(100% - 32px)); margin: 30px auto; display: grid; gap: 24px; }
+.tarjeta { padding: 28px; border: 1px solid #dbe3ed; border-radius: 18px; background: white; box-shadow: 0 12px 35px rgba(15, 23, 42, .07); }
+h2 { margin: 0; }
+.ayuda, .titulo-tabla p { margin: 7px 0 22px; color: #64748b; }
+
+.formulario { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.campo { display: grid; gap: 7px; }
+.ancho { grid-column: 1 / -1; }
+label { font-size: 14px; font-weight: 650; }
+input { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font: inherit; }
+input:focus { outline: 3px solid #ccfbf1; border-color: #0f766e; }
+button, .boton { justify-self: start; padding: 12px 18px; border: 0; border-radius: 10px; color: white; background: #0f766e; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; }
+button:hover, .boton:hover { background: #115e59; }
+
+.mensaje { margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; }
+.error { color: #991b1b; background: #fee2e2; }
+.exito { color: #166534; background: #dcfce7; }
+.titulo-tabla { display: flex; justify-content: space-between; gap: 16px; align-items: start; }
+.tabla-contenedor { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+th { color: #475569; background: #f8fafc; }
+.vacio { margin: 18px 0 0; padding: 28px; border: 1px dashed #cbd5e1; border-radius: 12px; color: #64748b; text-align: center; }
+
+@media (max-width: 700px) {
+    .encabezado { align-items: flex-start; flex-direction: column; }
+    .formulario { grid-template-columns: 1fr; }
+    .ancho { grid-column: auto; }
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro electoral</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="encabezado">
+        <div>
+            <p class="etiqueta">CASO 2 · CONSULTA ELECTORAL</p>
+            <h1>Registro de locales de votación</h1>
+            <p>Ingresa manualmente los resultados obtenidos mediante una consulta permitida.</p>
+        </div>
+        <span class="insignia">Tecsup</span>
+    </header>
+
+    <main class="contenido">
+        <section class="tarjeta">
+            <h2>Nuevo resultado</h2>
+            <p class="ayuda">Para las pruebas utiliza únicamente datos ficticios.</p>
+
+            {% if mensaje_error %}
+                <div class="mensaje error" role="alert">{{ mensaje_error }}</div>
+            {% endif %}
+            {% if mensaje_exito %}
+                <div class="mensaje exito" role="status">{{ mensaje_exito }}</div>
+            {% endif %}
+
+            <form method="post" class="formulario">
+                <div class="campo">
+                    <label for="dni">DNI</label>
+                    <input id="dni" name="dni" value="{{ datos.dni }}" maxlength="8" inputmode="numeric" placeholder="00000000" required>
+                </div>
+                <div class="campo">
+                    <label for="ubicacion">Ubicación</label>
+                    <input id="ubicacion" name="ubicacion" value="{{ datos.ubicacion }}" placeholder="Zona o referencia" required>
+                </div>
+                <div class="campo">
+                    <label for="region">Región</label>
+                    <input id="region" name="region" value="{{ datos.region }}" placeholder="Región" required>
+                </div>
+                <div class="campo">
+                    <label for="provincia">Provincia</label>
+                    <input id="provincia" name="provincia" value="{{ datos.provincia }}" placeholder="Provincia" required>
+                </div>
+                <div class="campo">
+                    <label for="distrito">Distrito</label>
+                    <input id="distrito" name="distrito" value="{{ datos.distrito }}" placeholder="Distrito" required>
+                </div>
+                <div class="campo ancho">
+                    <label for="direccion">Dirección del local de votación</label>
+                    <input id="direccion" name="direccion" value="{{ datos.direccion }}" placeholder="Dirección ficticia para la prueba" required>
+                </div>
+                <button type="submit">Agregar resultado</button>
+            </form>
+        </section>
+
+        <section class="tarjeta tabla-tarjeta">
+            <div class="titulo-tabla">
+                <div>
+                    <h2>Resultados registrados</h2>
+                    <p>{{ registros|length }} registro(s)</p>
+                </div>
+            </div>
+
+            {% if registros %}
+                <div class="tabla-contenedor">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>DNI</th>
+                                <th>Ubicación</th>
+                                <th>Región</th>
+                                <th>Provincia</th>
+                                <th>Distrito</th>
+                                <th>Dirección</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                                <tr>
+                                    <td>{{ registro.dni }}</td>
+                                    <td>{{ registro.ubicacion }}</td>
+                                    <td>{{ registro.region }}</td>
+                                    <td>{{ registro.provincia }}</td>
+                                    <td>{{ registro.distrito }}</td>
+                                    <td>{{ registro.direccion }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="vacio">Todavía no hay resultados registrados.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

@@ -127,18 +127,6 @@ git status
 git log --oneline
 ```
 
-### Evidencias
-
-Las capturas del Caso 1 deben guardarse en la ruta relativa `evidencias/caso1/`. Se recomienda usar estos nombres:
-
-- `01-flask-local.png`
-- `02-interfaz.png`
-- `03-descarga-valida.png`
-- `04-validacion-error.png`
-- `05-docker-base.png`
-- `06-docker-optimizado.png`
-- `07-comparacion-imagenes.png`
-- `08-docker-multistage.png`
 
 No se incluyen capturas ficticias. Los archivos deben agregarse después de tomarlas en la computadora donde se ejecutó la práctica.
 
