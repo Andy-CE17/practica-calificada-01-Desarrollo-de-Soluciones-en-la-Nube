@@ -115,9 +115,17 @@ docker run -d --name caso2-onpe -p 5000:5000 caso2-onpe:v1.2-multistage
 
 ## Evidencias
 
-Las capturas se organizan en:
+### Caso 1
 
-- evidencias/caso1/
-- evidencias/caso2/
+- [Página principal](evidencias/caso1/01-pagina-principal.png)
+- [Descarga desde YouTube](evidencias/caso1/02-youtube.png)
+- [Descarga desde TikTok](evidencias/caso1/03-tiktok.png)
+- [Descarga desde Facebook](evidencias/caso1/04-facebook.png)
 
-Los videos descargados, archivos Excel, entornos virtuales y datos privados están excluidos de Git.
+### Caso 2
+
+- [Interfaz principal](evidencias/caso2/01-interfaz-principal.png)
+- [Validación de resultado no miembro](evidencias/caso2/03-resultado-no-miembro.png)
+
+Los videos descargados, archivos Excel, entornos virtuales y evidencias con datos privados están excluidos de Git.
+
