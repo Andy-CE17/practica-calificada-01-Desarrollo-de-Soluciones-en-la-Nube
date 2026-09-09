@@ -3,7 +3,7 @@
 **Curso:** Desarrollo de Soluciones en la Nube — Tecsup  
 **Repositorio:** https://github.com/Andy-CE17/practica-calificada-01-Desarrollo-de-Soluciones-en-la-Nube
 
-Este repositorio contiene los dos casos de la Práctica Calificada 1. Actualmente se encuentra desarrollado y comprobado el Caso 1.
+Este repositorio contiene los dos casos de la Práctica Calificada 1. Los dos casos están desarrollados y comprobados localmente y mediante Docker.
 
 ## Caso 1: descargador de videos
 
@@ -126,6 +126,12 @@ Invoke-WebRequest -Uri http://localhost:5000 -UseBasicParsing
 git status
 git log --oneline
 ```
+### Evidencias
+
+Las capturas reales del Caso 1 deben guardarse en `evidencias/caso1/`. Deben mostrar la aplicación local, una descarga válida, una validación o error controlado, cada contenedor funcionando y la comparación de las tres imágenes.
+
+No se incluyen capturas ficticias. Los archivos deben agregarse después de tomarlas en la computadora donde se ejecutó la práctica.
+
 ### Problemas encontrados y solución
 
 1. La versión solicitada inicialmente de yt-dlp no existía en PyPI. Se consultaron las versiones disponibles y se fijó `2026.8.19`.
@@ -138,6 +144,137 @@ git log --oneline
 
 El Caso 1 permite validar y procesar enlaces públicos compatibles sin detener el servidor cuando una URL falla. La aplicación funciona localmente y en las tres imágenes Docker. El orden de capas, `.dockerignore` y la construcción multistage redujeron el tamaño final de 1.47 GB a 578 MB.
 
-## Caso 2
+## Caso 2: registro electoral y generación de Excel
 
-Pendiente de desarrollo. No debe iniciarse hasta aprobar completamente el Caso 1.
+Aplicación web para registrar manualmente los resultados de una consulta electoral permitida y exportarlos a Excel. El formulario administra DNI, ubicación, región, provincia, distrito y dirección del local de votación.
+
+La aplicación no automatiza consultas en el portal de ONPE ni intenta superar CAPTCHA, autenticación o controles anti-bot. Los datos de prueba deben ser ficticios. La URL de referencia indicada por la guía es <https://consultaelectoral.onpe.gob.pe/inicio>.
+
+### Tecnologías utilizadas
+
+- Python 3.11
+- Flask 3.1.2
+- openpyxl 3.1.5
+- HTML y CSS
+- Docker Desktop
+
+### Estructura
+
+```text
+caso2-onpe/
+├── app.py
+├── requirements.txt
+├── templates/
+│   └── index.html
+├── static/
+│   └── style.css
+├── exports/                # Los archivos XLSX están ignorados por Git
+├── .dockerignore
+├── Dockerfile
+├── Dockerfile.optimizado
+└── Dockerfile.multistage
+```
+
+### Funcionamiento y validaciones
+
+1. El usuario realiza la consulta permitida y copia manualmente el resultado.
+2. Completa todos los campos del formulario.
+3. El backend comprueba que ningún campo esté vacío y que el DNI tenga exactamente ocho dígitos.
+4. Los resultados válidos se muestran en una tabla.
+5. El botón **Exportar Excel** genera `exports/resultados_electorales.xlsx`.
+
+Los registros se mantienen en memoria mientras la aplicación está activa. Al reiniciar el proceso o el contenedor, la tabla comienza vacía.
+
+### Instalación y ejecución local
+
+Desde la raíz del repositorio:
+
+```powershell
+Set-Location .\caso2-onpe
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe app.py
+```
+
+Abrir <http://localhost:5000>. Para comprobar la validación se puede enviar el formulario vacío o utilizar un DNI que no tenga ocho dígitos.
+
+### Generación de Excel
+
+Después de agregar al menos un registro, seleccionar **Exportar Excel**. El archivo contiene los encabezados DNI, Ubicación, Región, Provincia, Distrito y Dirección del local de votación.
+
+```powershell
+Get-ChildItem .\exports
+```
+
+La carpeta `exports` está ignorada para evitar versionar información electoral o archivos generados.
+
+### Dockerfile base
+
+```powershell
+docker build -t caso2-onpe:v1.0 .
+docker run -d --name caso2-onpe-v1 -p 5000:5000 caso2-onpe:v1.0
+docker ps
+docker logs caso2-onpe-v1
+```
+
+### Dockerfile optimizado
+
+`Dockerfile.optimizado` copia primero `requirements.txt` para reutilizar la capa de dependencias. `.dockerignore` evita enviar Git, entornos virtuales, exportaciones, cachés y archivos temporales al contexto de construcción.
+
+```powershell
+docker build -f Dockerfile.optimizado -t caso2-onpe:v1.1-optimizado .
+docker run -d --name caso2-onpe-optimizado -p 5000:5000 caso2-onpe:v1.1-optimizado
+```
+
+### Dockerfile Multi-Stage
+
+La primera etapa instala las dependencias en `/opt/python`. La etapa final usa Debian, instala únicamente Python y certificados, y copia las dependencias preparadas junto con el código.
+
+```powershell
+docker build -f Dockerfile.multistage -t caso2-onpe:v1.2-multistage .
+docker run -d --name caso2-onpe-multistage -p 5000:5000 caso2-onpe:v1.2-multistage
+```
+
+### Comparación obtenida
+
+```powershell
+docker images caso2-onpe
+```
+
+| Imagen | Tamaño obtenido |
+| --- | ---: |
+| `caso2-onpe:v1.0` | 273 MB |
+| `caso2-onpe:v1.1-optimizado` | 210 MB |
+| `caso2-onpe:v1.2-multistage` | 193 MB |
+
+Los tamaños pueden variar ligeramente según Docker Desktop y las imágenes base.
+
+### Comandos de comprobación
+
+```powershell
+docker ps
+docker logs <nombre-contenedor>
+docker images caso2-onpe
+Invoke-WebRequest -Uri http://localhost:5000 -UseBasicParsing
+git status
+git log --oneline
+```
+
+Durante las pruebas de esta computadora se utilizó temporalmente `-p 5002:5000` porque el puerto 5000 estaba ocupado por otro contenedor.
+
+### Evidencias
+
+Las capturas reales deben guardarse en `evidencias/caso2/`. Se recomienda incluir la ejecución local, el formulario con datos ficticios, el Excel abierto, cada contenedor funcionando y la comparación de las tres imágenes.
+
+No se incluyen capturas ficticias. Los archivos deben agregarse después de tomarlas en la computadora donde se ejecutó la práctica.
+
+### Observaciones y solución de problemas
+
+- Si el portal presenta CAPTCHA o controles anti-bot, la consulta se realiza manualmente y el resultado se ingresa en esta aplicación.
+- Si el puerto 5000 está ocupado, se puede utilizar `-p 5002:5000` y abrir <http://localhost:5002>.
+- Si se intenta exportar sin registros, la aplicación muestra un mensaje y no genera un archivo vacío.
+- Los archivos `.xlsx` generados y los entornos virtuales están excluidos de Git.
+
+### Conclusión
+
+El Caso 2 permite organizar resultados ingresados manualmente, validarlos y exportarlos a un Excel con encabezados claros. Las tres variantes Docker funcionan y la construcción multistage redujo la imagen de 273 MB a 193 MB.
